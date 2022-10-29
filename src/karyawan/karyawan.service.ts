@@ -1,26 +1,47 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateKaryawanDto } from './dto/create-karyawan.dto';
 import { UpdateKaryawanDto } from './dto/update-karyawan.dto';
+import { Karyawan } from './entities/karyawan.entity';
 
 @Injectable()
 export class KaryawanService {
-  create(createKaryawanDto: CreateKaryawanDto) {
-    return 'This action adds a new karyawan';
+  constructor(
+    @InjectRepository(Karyawan)
+    private karyawanRepository: Repository<Karyawan>,
+  ) {}
+
+  create(createKaryawanDto: CreateKaryawanDto): Promise<Karyawan> {
+    const karyawan = this.karyawanRepository.create(createKaryawanDto);
+    return this.karyawanRepository.save(karyawan);
   }
 
-  findAll() {
-    return `This action returns all karyawan`;
+  findAll(): Promise<Karyawan[]> {
+    return this.karyawanRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} karyawan`;
+  async update(
+    id: number,
+    updateKaryawanDto: UpdateKaryawanDto,
+  ): Promise<boolean> {
+    const karyawan = await this.karyawanRepository.update(
+      id,
+      updateKaryawanDto,
+    );
+    if (!karyawan.affected) {
+      return false;
+    }
+
+    return true;
   }
 
-  update(id: number, updateKaryawanDto: UpdateKaryawanDto) {
-    return `This action updates a #${id} karyawan`;
-  }
+  async remove(id: number): Promise<boolean> {
+    const karyawan = await this.karyawanRepository.delete(id);
+    if (!karyawan.affected) {
+      return false;
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} karyawan`;
+    return true;
   }
 }

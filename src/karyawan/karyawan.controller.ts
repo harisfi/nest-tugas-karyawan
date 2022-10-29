@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, InternalServerErrorException } from '@nestjs/common';
 import { KaryawanService } from './karyawan.service';
 import { CreateKaryawanDto } from './dto/create-karyawan.dto';
 import { UpdateKaryawanDto } from './dto/update-karyawan.dto';
@@ -7,7 +7,7 @@ import { UpdateKaryawanDto } from './dto/update-karyawan.dto';
 export class KaryawanController {
   constructor(private readonly karyawanService: KaryawanService) {}
 
-  @Post()
+  @Post('create')
   create(@Body() createKaryawanDto: CreateKaryawanDto) {
     return this.karyawanService.create(createKaryawanDto);
   }
@@ -17,18 +17,32 @@ export class KaryawanController {
     return this.karyawanService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.karyawanService.findOne(+id);
+  @Put('update/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateKaryawanDto: UpdateKaryawanDto,
+  ) {
+    const updated = await this.karyawanService.update(+id, updateKaryawanDto);
+    if (updated) {
+      return {
+        statusCode: 200,
+        message: 'Data Successfully Updated',
+      };
+    }
+
+    throw new InternalServerErrorException();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateKaryawanDto: UpdateKaryawanDto) {
-    return this.karyawanService.update(+id, updateKaryawanDto);
-  }
+  @Delete('delete/:id')
+  async remove(@Param('id') id: string) {
+    const deleted = await this.karyawanService.remove(+id);
+    if (deleted) {
+      return {
+        statusCode: 200,
+        message: 'Data Successfully Deleted',
+      };
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.karyawanService.remove(+id);
+    throw new InternalServerErrorException();
   }
 }
