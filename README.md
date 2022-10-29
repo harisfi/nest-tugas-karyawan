@@ -15,6 +15,13 @@
 $ npm install
 ```
 
+## Set-up the environment
+1. Copy .env.example to .env
+    ```bash
+    $ cp .env.example .env
+    ```
+2. Edit your database configurations
+
 ## Running the migration
 
 ```bash
