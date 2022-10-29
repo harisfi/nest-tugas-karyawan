@@ -8,7 +8,7 @@ export class Tugas {
 
   @OneToOne(() => Karyawan)
   @JoinColumn()
-  asignee: Karyawan;
+  assignee: Karyawan;
 
   @Column()
   title: string;

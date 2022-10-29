@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { KaryawanService } from './karyawan.service';
 import { CreateKaryawanDto } from './dto/create-karyawan.dto';
 import { UpdateKaryawanDto } from './dto/update-karyawan.dto';
@@ -22,6 +22,10 @@ export class KaryawanController {
     @Param('id') id: string,
     @Body() updateKaryawanDto: UpdateKaryawanDto,
   ) {
+    if (Object.keys(updateKaryawanDto).length === 0) {
+      throw new BadRequestException();
+    }
+
     const updated = await this.karyawanService.update(+id, updateKaryawanDto);
     if (updated) {
       return {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { TugasService } from './tugas.service';
 import { CreateTugasDto } from './dto/create-tugas.dto';
 import { UpdateTugasDto } from './dto/update-tugas.dto';
@@ -7,7 +7,7 @@ import { UpdateTugasDto } from './dto/update-tugas.dto';
 export class TugasController {
   constructor(private readonly tugasService: TugasService) {}
 
-  @Post()
+  @Post('create')
   create(@Body() createTugasDto: CreateTugasDto) {
     return this.tugasService.create(createTugasDto);
   }
@@ -17,18 +17,36 @@ export class TugasController {
     return this.tugasService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tugasService.findOne(+id);
+  @Put('update/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateTugasDto: UpdateTugasDto,
+  ) {
+    if (Object.keys(updateTugasDto).length === 0) {
+      throw new BadRequestException();
+    }
+
+    const updated = await this.tugasService.update(+id, updateTugasDto);
+    if (updated) {
+      return {
+        statusCode: 200,
+        message: 'Data Successfully Updated',
+      };
+    }
+
+    throw new InternalServerErrorException();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTugasDto: UpdateTugasDto) {
-    return this.tugasService.update(+id, updateTugasDto);
-  }
+  @Delete('delete/:id')
+  async remove(@Param('id') id: string) {
+    const deleted = await this.tugasService.remove(+id);
+    if (deleted) {
+      return {
+        statusCode: 200,
+        message: 'Data Successfully Deleted',
+      };
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tugasService.remove(+id);
+    throw new InternalServerErrorException();
   }
 }
